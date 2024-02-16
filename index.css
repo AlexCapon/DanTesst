@@ -1,5 +1,9 @@
+html {
+  font-size: 200%;
+}
 div {
   margin: 1px;
+  height: 5%;
 }
 button {
   background: none;
