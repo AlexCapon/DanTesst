@@ -1,0 +1,25 @@
+div {
+  margin: 1px;
+}
+button {
+  background: none;
+  border: none;
+  margin-right: 1px;
+}
+.loader {
+  padding: 5%
+}
+.tree {
+  padding: 3%;
+}
+.branch {
+  margin-left: 1%;
+}
+.hidden {
+  width: 0;
+  height: 0;
+  display: none;
+}
+.closed {
+  rotate: -90deg;
+}
