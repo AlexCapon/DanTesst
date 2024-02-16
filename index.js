@@ -23,8 +23,11 @@ function renderTree () {
       const tree = createTree(dataArray)
       loader.remove()
       body.appendChild(tree)
+
+      const buttons = body.querySelectorAll('.parent-button')
+      buttons.forEach((button) => button.addEventListener('click', () => toggleChildren(button)))
     })
-    .catch((err) => console.log('error:', err))
+    .catch((err) => console.log('error: ', err))
 }
 function createTree (array) {
   const tree = document.createElement('div')
@@ -94,12 +97,6 @@ function createButton (nodeId, nodeIsParent) {
 
   return button
 }
-
-renderTree()
-
-const buttons = body.querySelectorAll('.parent-button')
-buttons.forEach((button) => button.addEventListener('click', () => toggleChildren(button)))
-
 function toggleChildren (button) {
   const parent = button.closest('div')
   const childrenRoom = parent.querySelector('.children')
@@ -107,3 +104,5 @@ function toggleChildren (button) {
   button.classList.toggle('closed')
   childrenRoom.classList.toggle('hidden')
 }
+
+renderTree()
