@@ -27,12 +27,12 @@ function renderTree () {
     })
     .catch((err) => console.log('error: ', err))
 }
-function createTree (roots) {
-  const tree = document.createElement('div')
-  tree.classList.add('tree')
-  roots.forEach((root) => tree.appendChild(root))
+function createNodes (array) {
+  const nodes = array.map((element) => createNode(element))
+  const sortedNodes = nodes.toSorted((a, b) => a.getAttribute('sorthead') - b.getAttribute('sorthead'))
+  sortedNodes.forEach((node) => node.removeAttribute('sorthead'))
 
-  return tree
+  return sortedNodes
 }
 function createRoots (nodes) {
   nodes.forEach((node) => {
@@ -47,12 +47,12 @@ function createRoots (nodes) {
 
   return nodes.filter((node) => node.classList.contains('root'))
 }
-function createNodes (array) {
-  const nodes = array.map((element) => createNode(element))
-  const sortedNodes = nodes.toSorted((a, b) => a.getAttribute('sorthead') - b.getAttribute('sorthead'))
-  sortedNodes.forEach((node) => node.removeAttribute('sorthead'))
+function createTree (roots) {
+  const tree = document.createElement('div')
+  tree.classList.add('tree')
+  roots.forEach((root) => tree.appendChild(root))
 
-  return sortedNodes
+  return tree
 }
 
 function createNode (object) {
@@ -100,6 +100,7 @@ function createButton (nodeId, isParent) {
 
   return button
 }
+
 function createLoader () {
   const loader = document.createElement('h2')
   loader.classList.add('loader')
