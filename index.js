@@ -9,72 +9,75 @@ const minusIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16
 </svg>`
 
 function renderTree () {
-  const loader = document.createElement('div')
-  loader.classList.add('loader')
-  const loaderText = document.createElement('h2')
-  loaderText.textContent = 'Загрузка...'
-  loader.appendChild(loaderText)
+  const loader = createLoader()
   body.appendChild(loader)
 
   fetchServices()
     .then((response) => {
       const dataObject = JSON.parse(response)
-      const dataArray = Object.values(dataObject)[0]
-      const tree = createTree(dataArray)
+      const [dataArray] = Object.values(dataObject)
+
+      const nodes = createNodes(dataArray)
+      const roots = createRoots(nodes)
+      const tree = createTree(roots)
+      addListenersOnButtons(tree)
+
       loader.remove()
       body.appendChild(tree)
-
-      const buttons = body.querySelectorAll('.parent-button')
-      buttons.forEach((button) => button.addEventListener('click', () => toggleChildren(button)))
     })
     .catch((err) => console.log('error: ', err))
 }
-function createTree (array) {
+function createTree (roots) {
   const tree = document.createElement('div')
   tree.classList.add('tree')
+  roots.forEach((root) => tree.appendChild(root))
 
-  const nodes = createNodes(array)
+  return tree
+}
+function createRoots (nodes) {
   nodes.forEach((node) => {
     if (node.hasAttribute('head')) {
       const head = node.getAttribute('head')
       const parent = nodes.find((parentNode) => parentNode.id === head)
       const childrenRoom = parent.querySelector('.children')
+      node.removeAttribute('head')
       childrenRoom.appendChild(node)
     }
   })
 
-  const roots = nodes.filter((node) => node.classList.contains('root'))
-  roots.forEach((root) => tree.appendChild(root))
-
-  return tree
+  return nodes.filter((node) => node.classList.contains('root'))
 }
 function createNodes (array) {
-  const sortedArray = array.toSorted((a, b) => a.sorthead - b.sorthead)
-  const nodes = sortedArray.map((element) => {
-    const node = document.createElement('div')
+  const nodes = array.map((element) => createNode(element))
+  const sortedNodes = nodes.toSorted((a, b) => a.getAttribute('sorthead') - b.getAttribute('sorthead'))
+  sortedNodes.forEach((node) => node.removeAttribute('sorthead'))
 
-    const nodeClass = element.node === 0 ? 'list' : 'parent'
-    const nodeType = element.head === null ? 'root' : 'branch'
-    node.classList.add(nodeClass, nodeType)
+  return sortedNodes
+}
 
-    node.setAttribute('id', element.id)
-    if (nodeType !== 'root') node.setAttribute('head', element.head)
+function createNode (object) {
+  const node = document.createElement('div')
 
-    const text = createText(element.name, element.price)
-    const button = createButton(element.id, (element.node !== 0))
-    node.appendChild(button)
-    node.appendChild(text)
+  const nodeClass = object.node === 0 ? 'list' : 'parent'
+  const nodeType = object.head === null ? 'root' : 'branch'
+  node.classList.add(nodeClass, nodeType)
 
-    if (nodeClass === 'parent') {
-      const children = document.createElement('div')
-      children.classList.add('children')
-      node.appendChild(children)
-    }
+  node.setAttribute('sorthead', object.sorthead)
+  node.setAttribute('id', object.id)
+  if (nodeType !== 'root') node.setAttribute('head', object.head)
 
-    return node
-  })
+  const text = createText(object.name, object.price)
+  const button = createButton(object.id, (object.node !== 0))
+  node.appendChild(button)
+  node.appendChild(text)
 
-  return nodes
+  if (nodeClass === 'parent') {
+    const children = document.createElement('div')
+    children.classList.add('children')
+    node.appendChild(children)
+  }
+
+  return node
 }
 function createText (name, price) {
   const isPrice = price > 0
@@ -84,10 +87,10 @@ function createText (name, price) {
 
   return text
 }
-function createButton (nodeId, nodeIsParent) {
+function createButton (nodeId, isParent) {
   const button = document.createElement('button')
   button.setAttribute('id', `${nodeId}`)
-  if (nodeIsParent) {
+  if (isParent) {
     button.classList.add('parent-button')
     button.innerHTML = arrowIcon
   } else {
@@ -96,6 +99,17 @@ function createButton (nodeId, nodeIsParent) {
   }
 
   return button
+}
+function createLoader () {
+  const loader = document.createElement('h2')
+  loader.classList.add('loader')
+  loader.textContent = 'Загрузка...'
+
+  return loader
+}
+function addListenersOnButtons (node) {
+  const buttons = node.querySelectorAll('.parent-button')
+  buttons.forEach((button) => button.addEventListener('click', () => toggleChildren(button)))
 }
 function toggleChildren (button) {
   const parent = button.closest('div')
